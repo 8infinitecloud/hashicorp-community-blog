@@ -1,0 +1,22 @@
+# Etiquetas permitidas para los posts. Si necesitas una nueva, propónla en tu PR.
+tags:
+  - terraform
+  - vault
+  - consul
+  - nomad
+  - packer
+  - boundary
+  - waypoint
+  - vagrant
+  - sentinel
+  - hcp
+  - aws
+  - azure
+  - gcp
+  - kubernetes
+  - devops
+  - platform-engineering
+  - seguridad
+  - ia
+  - certificacion
+  - comunidad
