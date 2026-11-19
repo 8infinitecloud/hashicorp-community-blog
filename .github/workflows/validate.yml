@@ -28,6 +28,8 @@ jobs:
           sparse-checkout: |
             scripts
             tags.yml
+            posts
+            authors
           persist-credentials: false
 
       - uses: actions/setup-python@v5
@@ -39,17 +41,22 @@ jobs:
       - name: Validar
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          FROM_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           VALIDATOR=base/scripts/validate.py
           [ -f "$VALIDATOR" ] || VALIDATOR=content/scripts/validate.py
           if [ -n "$BASE_SHA" ]; then
             mapfile -t CHANGED < <(git -C content diff --name-only "$BASE_SHA" HEAD)
             echo "Archivos modificados:"; printf '  %s\n' "${CHANGED[@]}"
-            # Los cambios a la infraestructura del repo (workflows, scripts) los revisan los mantenedores.
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
-              CHANGED=()
+            if [ "$FROM_FORK" = "true" ]; then
+              # Colaboradores: solo posts/ y authors/, y solo sus propios posts y su ficha.
+              python "$VALIDATOR" --root content --changed "${CHANGED[@]}" \
+                --pr-author "$PR_AUTHOR" --base base
+            else
+              # Ramas del propio repo (mantenedores): pueden tocar todo, se valida el contenido.
+              python "$VALIDATOR" --root content
             fi
-            python "$VALIDATOR" --root content --changed "${CHANGED[@]}"
           else
             python "$VALIDATOR" --root content
           fi

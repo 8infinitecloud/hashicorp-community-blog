@@ -63,8 +63,11 @@ Es el mismo chequeo que corre en el PR.
 ## 5. Abre el Pull Request
 
 - Un post por PR. Solo modifica tu carpeta en `posts/` y tu ficha en `authors/`.
+- `author` debe ser tu usuario de GitHub: el chequeo compara con quien abre el PR.
+- Solo puedes editar **tus propios posts** y **tu propia ficha**. Si ves un error en el post de otra persona, abre un issue.
 - Completa la plantilla del PR.
 - El equipo de organizadores revisará el contenido y te dejará comentarios en el mismo PR.
 - Cuando se haga merge, el post aparecerá en [peru-hug.com/blog](https://peru-hug.com/blog/) en unos minutos (como máximo al día siguiente).
+- Además, lo compartimos en la [página de LinkedIn de Peru HUG](https://www.linkedin.com/company/peru-hashicorp-user-group/) mencionándote.
 
 ¿Tienes una idea pero no sabes si encaja? Abre un issue con la plantilla **Propuesta de post** y lo conversamos.
