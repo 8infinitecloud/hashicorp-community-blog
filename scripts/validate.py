@@ -27,6 +27,8 @@ AUTHORS = ROOT / "authors"
 SLUG_RE = re.compile(r"^\d{4}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 GITHUB_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 LINKEDIN_RE = re.compile(r"^https://(www\.)?linkedin\.com/in/[A-Za-z0-9\-_%]+/?$")
+REPO_RE = re.compile(r"^https://github\.com/[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}/?$")
+SLIDES_RE = re.compile(r"^https://(drive\.google\.com|docs\.google\.com|speakerdeck\.com|(www\.)?slideshare\.net)/\S+$")
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 MAX_IMAGE_BYTES = 1_000_000
 MAX_POST_IMAGES_BYTES = 5_000_000
@@ -120,7 +122,7 @@ def validate_post(folder: Path, authors: set[str], tags: set[str]) -> None:
         err(index, "falta el frontmatter (bloque entre --- al inicio)")
         return
 
-    allowed = {"title", "date", "author", "summary", "tags", "cover", "draft"}
+    allowed = {"title", "date", "author", "summary", "tags", "cover", "draft", "repo", "slides"}
     extra = set(meta) - allowed
     if extra:
         err(index, f"campos no reconocidos: {', '.join(sorted(extra))}")
@@ -157,6 +159,13 @@ def validate_post(folder: Path, authors: set[str], tags: set[str]) -> None:
 
     if "draft" in meta and not isinstance(meta["draft"], bool):
         err(index, "`draft` debe ser true o false")
+
+    repo = meta.get("repo")
+    if repo is not None and not (isinstance(repo, str) and REPO_RE.match(repo)):
+        err(index, "`repo` debe ser la URL de un repo público: https://github.com/<usuario>/<repo>")
+    slides = meta.get("slides")
+    if slides is not None and not (isinstance(slides, str) and SLIDES_RE.match(slides)):
+        err(index, "`slides` debe ser un enlace https de Google Drive/Slides, Speaker Deck o SlideShare")
 
     cover = meta.get("cover")
     if cover is not None:
