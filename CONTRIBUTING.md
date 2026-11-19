@@ -34,11 +34,16 @@ author: tu-usuario-de-github             # obligatorio, debe existir en authors/
 summary: "De qué trata, en una o dos frases."   # obligatorio, máximo 220 caracteres
 tags: [terraform, aws]                   # obligatorio, de 1 a 5, solo las de tags.yml
 cover: img/portada.png                   # opcional
+repo: https://github.com/tu-usuario/tu-repo     # opcional: repo público con el código
+slides: https://drive.google.com/...            # opcional: Drive/Slides, Speaker Deck o SlideShare
 draft: true                              # opcional: no se publica mientras sea true
 ---
 ```
 
 Un post con `date` en el futuro se publica automáticamente ese día.
+
+Si agregas `repo` o `slides`, el post muestra al inicio una tarjeta de **Recursos** con el repo
+(descripción, lenguaje, estrellas y el `git clone` listo para copiar) y el botón a la presentación.
 
 ## 3. Reglas de contenido
 

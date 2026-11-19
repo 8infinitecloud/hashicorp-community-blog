@@ -4,11 +4,11 @@ date: 2026-11-19
 author: 8infinitecloud
 summary: "Toyota, Codecov y CircleCI tienen algo en común: un secreto expuesto. Repasamos esos casos y cómo HCP Vault Radar detecta credenciales filtradas antes de que lleguen a producción."
 tags: [vault, hcp, seguridad, devops]
+repo: https://github.com/8infinitecloud/hashicorp-vault-radar-demo
+slides: https://drive.google.com/file/d/1BUxVsU_YVkpAy6mRgW4Q658F09rOykVT/view
 ---
 
 Una contraseña en un archivo de configuración, un token pegado en un script de CI o una llave SSH olvidada en un commit: así empiezan muchas de las filtraciones más costosas. Este post resume mi charla en Peru HUG sobre **HCP Vault Radar** y cómo ayuda a pasar de reaccionar a prevenir.
-
-📑 **Presentación completa:** [Cómo Vault Radar previene filtraciones antes de que ocurran](https://drive.google.com/file/d/1BUxVsU_YVkpAy6mRgW4Q658F09rOykVT/view)
 
 ## Tres filtraciones que empezaron con un secreto expuesto
 
@@ -47,7 +47,7 @@ Además del escaneo, Vault Radar:
 
 ## La demo: reproducir los casos en un repositorio
 
-Para la charla armé un repositorio con vulnerabilidades **intencionales y ficticias** que imitan cada caso:
+Para la charla armé [hashicorp-vault-radar-demo](https://github.com/8infinitecloud/hashicorp-vault-radar-demo), un repositorio con vulnerabilidades **intencionales y ficticias** que imitan cada caso. Ningún secreto es real: son valores de ejemplo para que el escáner tenga qué encontrar. Estas son sus carpetas principales:
 
 - `toyota-case/`: contraseñas de bases de datos en Python, Spring y archivos `.properties`, y una llave SSH privada.
 - `codecov-case/`: el script de subida alterado y tokens de API escritos directamente en scripts y `package.json`.
@@ -63,13 +63,19 @@ environment:
   DATABASE_URL: postgresql://admin:password123@db.example.com:5432/app
 ```
 
-Para escanear una carpeta con el CLI de Vault Radar, después de configurar las credenciales de tu proyecto de HCP:
+### Pruébalo tú mismo
+
+Clona el repo y escanea un caso con el CLI de Vault Radar, después de configurar las credenciales de tu proyecto de HCP:
 
 ```bash
+git clone https://github.com/8infinitecloud/hashicorp-vault-radar-demo.git
+cd hashicorp-vault-radar-demo
 vault-radar scan folder -p ./circleci-case -o circleci.csv
 ```
 
 El reporte lista cada secreto encontrado, el archivo donde está y su severidad. Revisa la [documentación del CLI](https://developer.hashicorp.com/hcp/docs/vault-radar/cli) para ver todas las fuentes que puede escanear.
+
+El repo también tiene las ramas `dev` y `qa` con secretos de "desarrollo" y "staging": un buen ejercicio para ver que un secreto en cualquier rama es igual de peligroso.
 
 ## Cómo resolverlo
 

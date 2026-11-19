@@ -5,6 +5,8 @@ author: tu-usuario-de-github
 summary: "Una o dos frases que expliquen de qué trata el post. Aparece en el índice del blog (máximo 220 caracteres)."
 tags: [terraform]
 # cover: img/portada.png   # opcional: imagen de portada dentro de img/
+# repo: https://github.com/tu-usuario/tu-repo   # opcional: repo público con el código del post
+# slides: https://drive.google.com/...          # opcional: presentación (Drive, Slides, Speaker Deck o SlideShare)
 # draft: true              # opcional: true para que el post no se publique todavía
 ---
 

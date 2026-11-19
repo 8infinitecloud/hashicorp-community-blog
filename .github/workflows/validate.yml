@@ -19,7 +19,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # El validador se toma de main, no del PR, para que un PR no pueda relajar las reglas.
       - name: Checkout del validador (main)
         uses: actions/checkout@v4
         with:
@@ -44,8 +43,10 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           FROM_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
+          # Forks: el validador de main, para que un PR no pueda relajar las reglas.
+          # Ramas del propio repo (mantenedores): el del PR, para poder cambiar las reglas y el contenido juntos.
           VALIDATOR=base/scripts/validate.py
-          [ -f "$VALIDATOR" ] || VALIDATOR=content/scripts/validate.py
+          if [ "$FROM_FORK" != "true" ] || [ ! -f "$VALIDATOR" ]; then VALIDATOR=content/scripts/validate.py; fi
           if [ -n "$BASE_SHA" ]; then
             mapfile -t CHANGED < <(git -C content diff --name-only "$BASE_SHA" HEAD)
             echo "Archivos modificados:"; printf '  %s\n' "${CHANGED[@]}"
