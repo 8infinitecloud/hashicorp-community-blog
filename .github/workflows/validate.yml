@@ -1,0 +1,55 @@
+name: Validar posts
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del contenido
+        uses: actions/checkout@v4
+        with:
+          path: content
+          fetch-depth: 0
+          persist-credentials: false
+
+      # El validador se toma de main, no del PR, para que un PR no pueda relajar las reglas.
+      - name: Checkout del validador (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: base
+          sparse-checkout: |
+            scripts
+            tags.yml
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pyyaml==6.0.2
+
+      - name: Validar
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          VALIDATOR=base/scripts/validate.py
+          [ -f "$VALIDATOR" ] || VALIDATOR=content/scripts/validate.py
+          if [ -n "$BASE_SHA" ]; then
+            mapfile -t CHANGED < <(git -C content diff --name-only "$BASE_SHA" HEAD)
+            echo "Archivos modificados:"; printf '  %s\n' "${CHANGED[@]}"
+            # Los cambios a la infraestructura del repo (workflows, scripts) los revisan los mantenedores.
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+              CHANGED=()
+            fi
+            python "$VALIDATOR" --root content --changed "${CHANGED[@]}"
+          else
+            python "$VALIDATOR" --root content
+          fi

@@ -1,0 +1,23 @@
+name: Propuesta de post
+description: Cuéntanos tu idea antes de escribirla
+title: "Propuesta: "
+labels: [propuesta]
+body:
+  - type: input
+    id: titulo
+    attributes:
+      label: Título tentativo
+    validations:
+      required: true
+  - type: textarea
+    id: resumen
+    attributes:
+      label: ¿De qué trata?
+      description: Qué problema resuelve y qué aprenderá quien lo lea.
+    validations:
+      required: true
+  - type: input
+    id: herramientas
+    attributes:
+      label: Herramientas
+      placeholder: terraform, vault, aws

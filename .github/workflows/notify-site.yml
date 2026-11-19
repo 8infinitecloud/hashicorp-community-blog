@@ -1,0 +1,36 @@
+name: Publicar en peru-hug.com
+
+# Cuando se integra contenido en main, avisa al repositorio del sitio para que
+# regenere /blog/. Sin el secret SITE_DISPATCH_TOKEN no hace nada: el sitio igual
+# regenera el blog una vez al día.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'posts/**'
+      - 'authors/**'
+      - 'tags.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Avisar al sitio
+        env:
+          TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::notice::SITE_DISPATCH_TOKEN no está configurado; el blog se publicará en la próxima ejecución diaria."
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/8infinitecloud/hashicorp-community-peru/dispatches \
+            -d "{\"event_type\":\"blog-updated\",\"client_payload\":{\"sha\":\"${GITHUB_SHA}\"}}"
+          echo "Aviso enviado al sitio."
