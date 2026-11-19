@@ -5,6 +5,8 @@ Uso:
     python scripts/validate.py                 # valida todo el repo
     python scripts/validate.py --changed a b   # además revisa que solo se toquen rutas permitidas
     python scripts/validate.py --root otra/ruta  # valida el contenido de otro checkout
+    python scripts/validate.py --changed ... --pr-author usuario --base ruta/a/main
+                                                 # además revisa que solo toque sus propios posts
 
 Sale con código 1 y lista los errores si algo no cumple las reglas de CONTRIBUTING.md.
 """
@@ -189,10 +191,45 @@ def validate_post(folder: Path, authors: set[str], tags: set[str]) -> None:
             err(img_dir, "las imágenes del post suman más de 5 MB")
 
 
+def post_author(index: Path) -> str | None:
+    """Autor declarado en el frontmatter de un post, o None si no se puede leer."""
+    if not index.is_file():
+        return None
+    try:
+        meta, _ = split_front_matter(index.read_text(encoding="utf-8"))
+    except yaml.YAMLError:
+        return None
+    author = (meta or {}).get("author")
+    return author if isinstance(author, str) else None
+
+
+def check_ownership(changed: list[str], pr_author: str, base: Path) -> None:
+    """Un PR desde un fork solo puede crear o editar posts propios y su propia ficha."""
+    me = pr_author.lower()
+    for path in changed:
+        parts = path.split("/")
+        if parts[0] == "authors" and len(parts) == 2:
+            if Path(parts[1]).stem.lower() != me:
+                err(path, f"solo puedes crear o editar tu propia ficha: authors/{pr_author}.yml")
+        elif parts[0] == "posts" and len(parts) >= 3:
+            slug = parts[1]
+            owner = post_author(base / "posts" / slug / "index.md")
+            if owner is not None:  # el post ya existe en main
+                if owner.lower() != me:
+                    err(path, f"este post es de @{owner}; solo puedes editar tus propios posts. "
+                              "Si encontraste un error, abre un issue.")
+            else:  # post nuevo
+                author = post_author(ROOT / "posts" / slug / "index.md")
+                if author is not None and author.lower() != me:
+                    err(path, f"`author` debe ser tu usuario de GitHub ({pr_author}), no {author!r}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--changed", nargs="*", default=[], help="archivos modificados en el PR")
     parser.add_argument("--root", type=Path, help="raíz del contenido a validar (por defecto, este repo)")
+    parser.add_argument("--pr-author", help="usuario de GitHub que abrió el PR")
+    parser.add_argument("--base", type=Path, help="checkout de main, para saber de quién es cada post")
     args = parser.parse_args()
 
     global ROOT, POSTS, AUTHORS
@@ -201,8 +238,12 @@ def main() -> int:
         POSTS, AUTHORS = ROOT / "posts", ROOT / "authors"
 
     for path in args.changed:
-        if not ALLOWED_CHANGE_RE.match(path) and not path.startswith("posts/_plantilla/"):
+        if not ALLOWED_CHANGE_RE.match(path) or path.startswith("posts/_plantilla/"):
             err(path, "un PR de colaboración solo puede modificar posts/<carpeta>/ y authors/<usuario>.yml")
+    if args.pr_author:
+        if not args.base:
+            parser.error("--pr-author necesita --base")
+        check_ownership(args.changed, args.pr_author, args.base.resolve())
 
     tags = load_tags()
     author_files = sorted(AUTHORS.glob("*.yml"))

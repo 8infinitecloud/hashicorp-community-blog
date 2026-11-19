@@ -24,7 +24,10 @@ Un chequeo automático revisa el formato en cada PR: que el frontmatter esté co
 
 Alguien del equipo de organizadores lee tu post y te deja comentarios en el mismo PR. Revisamos que el contenido sea técnicamente correcto, que respete el [Código de Conducta](https://peru-hug.com/code-of-conduct.html) y que se entienda bien.
 
-Cuando el PR se aprueba y se integra, el sitio genera la página de tu post con el estilo de peru-hug.com y la publica en [peru-hug.com/blog](https://peru-hug.com/blog/), con tu nombre, tu rol y enlaces a tus perfiles.
+Cuando el PR se aprueba y se integra, nosotros nos encargamos del resto:
+
+- Publicamos tu post en [peru-hug.com/blog](https://peru-hug.com/blog/), con el estilo del sitio, tu nombre, tu rol y enlaces a tus perfiles.
+- Lo compartimos en la [página de LinkedIn de Peru HUG](https://www.linkedin.com/company/peru-hashicorp-user-group/), mencionándote, para que llegue a toda la comunidad.
 
 ## Ideas para tu primer post
 
